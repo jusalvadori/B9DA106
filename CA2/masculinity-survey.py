@@ -1,0 +1,461 @@
+# -*- coding: utf-8 -*-
+"""
+Dublin Business School
+@author: Juliana Salvadori  @Student_number: 10521647
+@author: Peterson Donada    @Student_number: 10521646
+@Assigment: CA2
+
+"""
+
+import pandas as pd
+import numpy as np
+import os
+import matplotlib.pyplot as plt
+from itertools import cycle, islice 
+import seaborn as sns
+
+'''
+Load data
+######################################
+'''
+file_name='raw-responses.csv'
+data = pd.read_csv(file_name)
+
+'''
+Quick Glance
+######################################
+'''
+view = data.head(10)
+print(view)
+
+col_names = list(data)
+print(col_names)
+
+'''
+######################################
+Plot cards
+######################################
+'''
+columns = ['q0024','age3','q0026']
+# age3 = age range
+# q0024 = civil status
+# q0026 = sexual orientation
+data1 = data[columns]
+   
+#########################################
+# 1 pie chart
+s = len(data1)
+# get x (sizes) and y (labels) data 
+pie_labels = ['Respondents = ' + str(s)]
+pie_sizes = np.array(s)
+pie_colors = ['lightskyblue']
+# create a figure and axis 
+#fig1, ax1 = plt.subplots()
+#ax1.pie(x=pie_sizes, labels = pie_labels, colors=pie_colors, labeldistance=0.0)
+#ax1.set_title('Total respondents')
+#plt.show()
+
+#########################################
+# 2 bar chart - horizontal
+# count the occurrence of each class 
+tot = data1['age3'].value_counts().sort_index()
+# get x and y data 
+barhx = tot.index
+barhy = tot.values
+width = 0.75 # the width of the bars 
+ind = np.arange(len(barhy))  # the x locations for the groups
+barh_colors = list(islice(cycle(['b', 'r', 'g', 'y', 'k']), None, len(barhy)))
+# create a figure and axis 
+#fig, ax1 = plt.subplots() 
+#ax1.barh(ind, barhy, width, color= barh_colors)
+#ax1.set_yticks(ind+width/2)
+#ax1.set_yticklabels(barhx, minor=False)
+#plt.show()
+
+#########################################
+# 3 bar chart - vertical
+# count the occurrence of each class 
+tot = data1['q0026'].value_counts().sort_index()
+# get x and y data 
+scatterx = tot.index
+scattery = tot.values
+#width = 0.75 # the width of the bars 
+scatter_colors = list(islice(cycle(['b', 'r', 'g', 'y', 'k']), None, len(scattery)))
+# create a figure and axis 
+#fig, ax1 = plt.subplots() 
+#ax1.bar(scatterx, scattery, width= width, align='center', color= scatter_colors)
+#ax1.scatter(scatterx, scattery, color= scatter_colors)
+#plt.show()
+
+#########################################
+# 4 line chart
+# count the occurrence of each class 
+tot = data1['q0024'].value_counts().sort_index()
+# get x and y data 
+linex = tot.index
+liney = tot.values
+# create a figure and axis 
+#fig, ax1 = plt.subplots() 
+#ax1.plot(linex, liney)
+#plt.show()
+
+
+#########################################
+# cards
+fig, ((ax1, ax2), (ax3,ax4)) = plt.subplots(nrows=2, ncols=2, figsize=(15, 10))
+# total respondentss
+ax1.pie(x=pie_sizes, labels = pie_labels, colors=pie_colors, labeldistance=0.0)
+ax1.set_title('Total respondents')
+# total respondents by age range
+ax2.barh(ind, barhy, width, color= barh_colors)
+ax2.set_yticks(ind+width/2)
+ax2.set_yticklabels(barhx, minor=False)
+ax2.set_title('Total respondents by age group')
+# total respondents by sexual orientation
+ax3.scatter(scatterx, scattery, color= scatter_colors)
+ax3.set_title('Total respondents by sexual orientation')
+#total respondents by civil status
+ax4.plot(linex, liney)
+ax4.set_title('Total respondents by civil status')
+plt.show()
+
+'''
+######################################
+Plot 1
+In general, how masculine or “manly” do you feel?
+######################################
+'''
+columns = ['q0001', 'age3']
+data2 = data[columns]
+# add a column tot just to use it on the count
+data2["Respondents"] = 1
+
+data.groupby('q0001').size()
+'''
+In general, how masculine or “manly” do you feel?
+No answer                14
+Not at all masculine     32
+Not very masculine      131
+Somewhat masculine      826
+Very masculine          612
+'''
+
+q0001_count = data2.groupby(['q0001']).agg({'Respondents':['count']})
+q0001_count.columns = q0001_count.columns.droplevel(0)
+x = []
+y = []
+for row in q0001_count.iterrows():
+    x.append(row[0][0:20]) # get the row index
+    y.append(row[1][0])    # get the count value    
+
+fig, ax = plt.subplots()    
+width = 0.75 # the width of the bars 
+ind = np.arange(len(y))  # the x locations for the groups
+my_colors = list(islice(cycle(['b', 'r', 'g', 'y', 'k']), None, len(y)))
+ax.barh(ind, y, width, color= my_colors)
+ax.set_yticks(ind+width/2)
+ax.set_yticklabels(x, minor=False)
+plt.title('In general, how masculine or “manly” do you feel?')
+plt.xlabel('Number of respondents')
+
+for i, v in enumerate(y):
+    ax.text(v + 100, i, str(v), color='black', fontweight='bold', fontsize=14, ha='left', va='center')
+plt.show()
+
+#Plot the data:
+# use format='svg' or 'pdf' for vectorial pictures
+plt.savefig(os.path.join('test.png'), dpi=300, format='png', bbox_inches='tight') 
+
+
+'''
+######################################
+Plot 2
+How masculine do you feel? by Age group
+######################################
+'''
+data.groupby('age3').size()
+'''
+What is your age?
+18 - 34      133
+35 - 64      855
+65 and up    627
+'''
+data2 = data2[ data2['q0001'] != 'No answer']
+q0001_age_count = data2.groupby(['q0001','age3']).agg({'Respondents':['count']})
+q0001_age_count.columns = q0001_age_count.columns.droplevel(0)
+
+x = []
+y = []
+z = []
+for row in q0001_age_count.iterrows():
+    q0001 , age = row[0][0:20]
+    x.append(q0001)  # get the first row index
+    y.append(age)    # get the second row index
+    z.append(row[1][0])  # get the count value   
+    
+columns = ['q0001', 'Age group','count']    
+df = pd.DataFrame( list(zip(x, y,z)), columns = columns)
+fig, ax = plt.subplots(figsize=(15,10))
+axe = sns.barplot(ax=ax, x="q0001", y="count", hue="Age group", data=df, palette="Blues_d")
+axe.set_title("How masculine do you feel? by Age group")
+axe.set(xlabel=" ", ylabel="Number of respondents")
+
+'''
+######################################
+Plot 3
+How masculine do you feel? by Civil status
+######################################
+'''
+columns = ['q0001','q0024']
+data3 = data[columns]
+data3 = data3[ data3['q0001'] != 'No answer']
+# add a column tot just to use it on the count
+data3["Respondents"] = 1
+
+data.groupby('q0024').size()
+'''
+Are you now married, widowed, divorced, separated, or have you never
+been married?
+Divorced         218
+Married          996
+Never married    286
+No answer          8
+Separated         25
+Widowed           82
+'''
+result = data3[ data3['q0024'] != 'No answer']
+q0001_status_count = result.groupby(['q0001','q0024']).agg({'Respondents':['count']})
+
+x = []
+y = []
+z = []
+for row in q0001_status_count.iterrows():
+    q0001 , q0024 = row[0][0:20]
+    x.append(q0001)    # get the first row index
+    y.append(q0024)    # get the second row index
+    z.append(row[1][0])  # get the count value   
+    
+columns = ['q0001', 'Civil Status','count']    
+df = pd.DataFrame( list(zip(x, y,z)), columns = columns)
+fig, ax = plt.subplots(figsize=(15,10))
+axe = sns.barplot(ax=ax, x="q0001", y="count", hue="Civil Status", data=df)
+axe.set_title("How masculine do you feel? by Civil status")
+axe.set(xlabel=" ", ylabel="Number of respondents")
+
+'''
+######################################
+Plot 4 - Q0005
+Do you think that society puts pressure on men in a way that is unhealthy or bad
+for them?
+######################################
+'''
+columns = ['q0005']
+data.groupby('q0005').size()
+'''
+How often do you try to be the one who pays when on a date?
+No           647
+No answer     13
+Yes          955
+'''
+data4 = data[columns]
+#Get values from the group and categories
+label = ["All respondents"]
+yes = data4[ data4['q0005'] == 'Yes'].count()
+no  = data4[ data4['q0005'] == 'No'].count()
+no_answer =  data4[ data4['q0005'] == 'No answer'].count()
+
+columns = ["q0005","Yes", "No", "No answer"]
+df = pd.DataFrame( list(zip(label,yes,no,no_answer)) , columns = columns)
+# plot a Stacked Bar Chart using matplotlib 
+df.plot( x = 'q0005', kind = 'barh', figsize=(10,5),
+         stacked = True, 
+         title = 'Do you think that society puts pressure on men in a way that is unhealthy or bad for them?', 
+         mark_right = True ) 
+plt.ylabel(" ")
+
+df_total = df["Yes"] + df["No"] + df["No answer"] 
+df_rel = df[df.columns[1:]].div(df_total, 0)*100
+  
+for n in df_rel: 
+    for i, (cs, ab, pc) in enumerate(zip(df.iloc[:, 1:].cumsum(1)[n],  
+                                         df[n], df_rel[n])): 
+        plt.text(cs - ab / 2, i, str(np.round(pc, 1)) + '%',  
+                 va = 'center', ha = 'center')
+
+
+'''
+######################################
+Plot 4.1 - q0005 vs age3
+Do you think that society puts pressure on men in a way that is unhealthy or bad
+for them? by Age group
+######################################
+'''
+yes_values = []
+no_values  = []
+no_answer  = []
+         
+result = data[['q0005','age3']]
+# add a column tot just to use it on the count
+result["Respondents"] = 1
+result_count = result.groupby(['q0005','age3']).agg({'Respondents':['count']})
+
+for row in result_count.iterrows():
+    q0005 , age3 = row[0][0:20]
+    if q0005 == 'No':
+       no_values.append(row[1][0]) 
+    elif q0005 == 'Yes':
+       yes_values.append(row[1][0]) 
+    else:
+        no_answer.append(row[1][0]) 
+        
+df = pd.DataFrame({'Yes':yes_values,'No':no_values})
+# Names of group 
+names = ['18 - 34','35 - 64','65 and up']
+width = 0.85 # the width of the bars 
+ind = np.arange(len(yes_values))  # the x locations for the groups
+ax = df.plot.barh(stacked = True
+                 , width = width
+                 , figsize=(10,5)
+                 , title = 'Do you think that society puts pressure on men in a way that is unhealthy or bad for them? by Age group' )
+for rowNum,row in df.iterrows():
+    xpos = 0
+    for val in row:
+        xpos += val
+        ax.text(xpos -30, rowNum-0.05, str(val), color='black')
+    xpos = 0
+
+ax.set_yticks(ind+width/2)
+ax.set_yticklabels(names, minor=False)
+
+
+'''
+######################################
+Plot 5 - q0017
+Do you typically feel as though you’re expected to make the first move in romantic
+relationships?
+######################################
+'''
+columns = ['q0017']
+data.groupby('q0017').size()
+'''
+No            570
+No answer      31
+Yes          1014
+'''
+data4 = data[columns]
+#Get values from the group and categories
+label = ["All respondents"]
+yes = data4[ data4['q0017'] == 'Yes'].count()
+no  = data4[ data4['q0017'] == 'No'].count()
+no_answer =  data4[ data4['q0017'] == 'No answer'].count()
+
+columns = ["q0017","Yes", "No", "No answer"]
+df = pd.DataFrame( list(zip(label,yes,no,no_answer)) , columns = columns)
+# plot a Stacked Bar Chart using matplotlib 
+df.plot( x = 'q0017', kind = 'barh', figsize=(10,5),
+         stacked = True, 
+         title = 'Do you typically feel as though you’re expected to make the first move in romantic relationships?', 
+         mark_right = True ) 
+plt.ylabel(" ")
+
+df_total = df["Yes"] + df["No"] + df["No answer"] 
+df_rel = df[df.columns[1:]].div(df_total, 0)*100
+  
+for n in df_rel: 
+    for i, (cs, ab, pc) in enumerate(zip(df.iloc[:, 1:].cumsum(1)[n],  
+                                         df[n], df_rel[n])): 
+        plt.text(cs - ab / 2, i, str(np.round(pc, 1)) + '%',  
+                 va = 'center', ha = 'center')
+
+
+'''
+######################################
+Plot 5.1 - q0017 vs age3
+Do you typically feel as though you’re expected to make the first move in romantic
+relationships? by Age group
+######################################
+'''
+yes_values = []
+no_values  = []
+no_answer  = []
+         
+result = data[['q0017','age3']]
+# add a column tot just to use it on the count
+result["Respondents"] = 1
+result_count = result.groupby(['q0017','age3']).agg({'Respondents':['count']})
+
+for row in result_count.iterrows():
+    q0017 , age3 = row[0][0:20]
+    if q0017 == 'No':
+       no_values.append(row[1][0]) 
+    elif q0017 == 'Yes':
+       yes_values.append(row[1][0]) 
+    else:
+        no_answer.append(row[1][0]) 
+        
+df = pd.DataFrame({'Yes':yes_values,'No':no_values})
+# Names of group 
+names = ['18 - 34','35 - 64','65 and up']
+width = 0.85 # the width of the bars 
+ind = np.arange(len(yes_values))  # the x locations for the groups
+ax = df.plot.barh(stacked = True
+                , width = width
+                , figsize=(10,5)
+                , title = 'Do you typically feel as though you’re expected to make the first move in romantic relationships? by Age group' )
+for rowNum,row in df.iterrows():
+    xpos = 0
+    for val in row:
+        xpos += val
+        ax.text(xpos -30, rowNum-0.05, str(val), color='black')
+    xpos = 0
+
+ax.set_yticks(ind+width/2)
+ax.set_yticklabels(names, minor=False)
+
+
+'''
+######################################
+Plot 6
+How often do you try to be the one who pays when on a date?
+######################################
+'''
+columns = ['q0018','age3', 'q0024']
+data.groupby('q0018').size()
+'''
+How often do you try to be the one who pays when on a date?
+Always       794
+Never         75
+No answer     41
+Often        457
+Rarely        24
+Sometimes    224
+'''
+data6 = data[columns]
+data6 = data6[ data6['q0018'] != 'No answer']
+data6 = data6[ data6['q0024'] != 'No answer']
+# add a column tot just to use it on the count
+data6["Respondents"] = 1
+
+q0018_age_count = data6.groupby(['q0018','q0024','age3']).agg({'Respondents':['count']})
+
+x = []
+y = []
+w = []
+z = []
+for row in q0018_age_count.iterrows():
+    q0018, q0024, age3 = row[0][0:30]
+    x.append(q0018)    # get the first row index
+    w.append(q0024)    # get the second row index
+    y.append(age3)     # get the third row index 
+    z.append(row[1][0])  # get the count value   
+    
+columns = ['How often do you try to be the one who pays when on a date?','Civil Status','Age group','Number of respondents']    
+df = pd.DataFrame( list(zip(x,w,y,z)), columns = columns)
+axe = sns.catplot(x="How often do you try to be the one who pays when on a date?", y="Number of respondents", hue="Civil Status", col="Age group",
+                  data=df, kind="bar", height= 5, aspect= 1)     
+
+
+            
+            
+            
+            
