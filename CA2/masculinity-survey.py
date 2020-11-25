@@ -73,19 +73,24 @@ barh_colors = list(islice(cycle(['b', 'r', 'g', 'y', 'k']), None, len(barhy)))
 #plt.show()
 
 #########################################
-# 3 bar chart - vertical
+# 3 pie chart - 
 # count the occurrence of each class 
-tot = data1['q0026'].value_counts().sort_index()
-# get x and y data 
-scatterx = tot.index
-scattery = tot.values
-#width = 0.75 # the width of the bars 
-scatter_colors = list(islice(cycle(['b', 'r', 'g', 'y', 'k']), None, len(scattery)))
-# create a figure and axis 
-#fig, ax1 = plt.subplots() 
-#ax1.bar(scatterx, scattery, width= width, align='center', color= scatter_colors)
-#ax1.scatter(scatterx, scattery, color= scatter_colors)
-#plt.show()
+columns = ['q0026']
+pie2 = data[columns]
+# add a column tot just to use it on the count
+pie2["Respondents"] = 1
+q0026_count = pie2.groupby(['q0026']).agg({'Respondents':['count']})
+x = []
+y = []
+for row in q0026_count.iterrows():
+    x.append(row[0][0:20])  # get the row index
+    y.append(row[1][0])     # get the count value   
+   
+total = sum(y)
+y_pct = [ np.round( (x / total)*100,1) for x in y]   
+# get x (sizes) and y (labels) data 
+pie2_labels = x
+pie2_sizes = np.array(y_pct)
 
 #########################################
 # 4 line chart
@@ -112,7 +117,7 @@ ax2.set_yticks(ind+width/2)
 ax2.set_yticklabels(barhx, minor=False)
 ax2.set_title('Total respondents by age group')
 # total respondents by sexual orientation
-ax3.scatter(scatterx, scattery, color= scatter_colors)
+ax3.pie(x=pie2_sizes, labels = pie2_labels, autopct='%1.1f%%')
 ax3.set_title('Total respondents by sexual orientation')
 #total respondents by civil status
 ax4.plot(linex, liney)
@@ -155,7 +160,7 @@ my_colors = list(islice(cycle(['b', 'r', 'g', 'y', 'k']), None, len(y)))
 ax.barh(ind, y, width, color= my_colors)
 ax.set_yticks(ind+width/2)
 ax.set_yticklabels(x, minor=False)
-plt.title('In general, how masculine or “manly” do you feel?')
+plt.title('In general, how masculine or “manly” do you feel?', fontsize = 15)
 plt.xlabel('Number of respondents')
 
 for i, v in enumerate(y):
@@ -197,7 +202,7 @@ columns = ['q0001', 'Age group','count']
 df = pd.DataFrame( list(zip(x, y,z)), columns = columns)
 fig, ax = plt.subplots(figsize=(15,10))
 axe = sns.barplot(ax=ax, x="q0001", y="count", hue="Age group", data=df, palette="Blues_d")
-axe.set_title("How masculine do you feel? by Age group")
+axe.set_title("How masculine do you feel? by Age group", fontsize = 15)
 axe.set(xlabel=" ", ylabel="Number of respondents")
 
 '''
@@ -239,7 +244,7 @@ columns = ['q0001', 'Civil Status','count']
 df = pd.DataFrame( list(zip(x, y,z)), columns = columns)
 fig, ax = plt.subplots(figsize=(15,10))
 axe = sns.barplot(ax=ax, x="q0001", y="count", hue="Civil Status", data=df)
-axe.set_title("How masculine do you feel? by Civil status")
+axe.set_title("How masculine do you feel? by Civil status", fontsize = 15)
 axe.set(xlabel=" ", ylabel="Number of respondents")
 
 '''
@@ -454,8 +459,96 @@ df = pd.DataFrame( list(zip(x,w,y,z)), columns = columns)
 axe = sns.catplot(x="How often do you try to be the one who pays when on a date?", y="Number of respondents", hue="Civil Status", col="Age group",
                   data=df, kind="bar", height= 5, aspect= 1)     
 
+'''
+######################################
+Plot 7
+How important is it to you that others see you as masculine?
+######
+'''
+columns = ['q0002','age3']
+data.groupby('q0002').size()
+'''
+No answer                 9
+Not at all important    240
+Not too important       541
+Somewhat important      628
+Very important          197
+'''  
+data7 = data[columns]
+data7 = data7[ data7['q0002'] != 'No answer']
+# add a column tot just to use it on the count
+data7["Respondents"] = 1
+##########################################
+# pie1
+q0002_count = data7.groupby(['q0002']).agg({'Respondents':['count']})
+x = []
+y = []
+for row in q0002_count.iterrows():
+    x.append(row[0][0:20])  # get the row index
+    y.append(row[1][0])     # get the count value      
+total = sum(y)
+y_pct = [ np.round( (x / total)*100,1) for x in y]    
+# get x (sizes) and y (labels) data 
+labels1 = x
+sizes1 = np.array(y_pct)              
 
-            
-            
-            
-            
+##########################################
+# pie2 - Age group 18-34
+q0002 = data7[ data7['age3'] == '18 - 34']
+q0002_count = q0002.groupby(['q0002']).agg({'Respondents':['count']})
+x = []
+y = []
+for row in q0002_count.iterrows():
+    x.append(row[0][0:20])  # get the row index
+    y.append(row[1][0])     # get the count value      
+total = sum(y)
+y_pct = [ np.round( (x / total)*100,1) for x in y]    
+# get x (sizes) and y (labels) data 
+labels2 = x
+sizes2 = np.array(y_pct)    
+##########################################
+# pie3 - Age group 35-64
+q0002 = data7[ data7['age3'] == '35 - 64']
+q0002_count = q0002.groupby(['q0002']).agg({'Respondents':['count']})
+x = []
+y = []
+for row in q0002_count.iterrows():
+    x.append(row[0][0:20])  # get the row index
+    y.append(row[1][0])     # get the count value      
+total = sum(y)
+y_pct = [ np.round( (x / total)*100,1) for x in y]    
+# get x (sizes) and y (labels) data 
+labels3 = x
+sizes3 = np.array(y_pct)        
+##########################################
+# pie4 - Age group 65 and up
+q0002 = data7[ data7['age3'] == '65 and up']
+q0002_count = q0002.groupby(['q0002']).agg({'Respondents':['count']})
+x = []
+y = []
+for row in q0002_count.iterrows():
+    x.append(row[0][0:20])  # get the row index
+    y.append(row[1][0])     # get the count value      
+total = sum(y)
+y_pct = [ np.round( (x / total)*100,1) for x in y]    
+# get x (sizes) and y (labels) data 
+labels4 = x
+sizes4 = np.array(y_pct)          
+         
+#########################################
+# cards
+fig, ((ax1, ax2), (ax3,ax4)) = plt.subplots(nrows=2, ncols=2, figsize=(15, 10))
+fig.suptitle('How important is it to you that others see you as masculine?', fontsize = 15)
+# pie1 - overal
+ax1.pie(x=sizes1, labels=labels1, autopct='%1.1f%%')
+ax1.set_title('Overall - all respondets')
+# pie2 - 
+ax2.pie(x=sizes2, labels=labels2, autopct='%1.1f%%')
+ax2.set_title('Age group 18 - 34')
+# pie3
+ax3.pie(x=sizes3, labels=labels3, autopct='%1.1f%%')
+ax3.set_title('Age group 35 - 64')
+# pie4
+ax4.pie(x=sizes4, labels=labels4, autopct='%1.1f%%')
+ax4.set_title('Age group 65 and up')
+plt.show()
