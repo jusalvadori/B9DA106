@@ -193,7 +193,7 @@ leg5 = mpatches.Patch(color='tab:cyan', label='no answer')
 ax3.legend(handles=[leg1, leg2, leg3, leg4, leg5], ncol=5)
 ax3.set_title('Total respondents by sexual orientation')
 #total respondents by civil status
-ax4.plot(linex, liney)
+ax4.plot(linex, liney, marker='o')
 ax4.set_title('Total respondents by civil status')
 plt.show()
 
