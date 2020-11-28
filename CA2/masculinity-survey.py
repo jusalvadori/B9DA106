@@ -13,6 +13,7 @@ import os
 import matplotlib.pyplot as plt
 from itertools import cycle, islice 
 import seaborn as sns
+import matplotlib.patches as mpatches
 
 '''
 Load data
@@ -73,24 +74,67 @@ barh_colors = list(islice(cycle(['b', 'r', 'g', 'y', 'k']), None, len(barhy)))
 #plt.show()
 
 #########################################
-# 3 pie chart - 
+# 3 stacked bar chart - 
 # count the occurrence of each class 
 columns = ['q0026']
-pie2 = data[columns]
-# add a column tot just to use it on the count
-pie2["Respondents"] = 1
-q0026_count = pie2.groupby(['q0026']).agg({'Respondents':['count']})
-x = []
-y = []
-for row in q0026_count.iterrows():
-    x.append(row[0][0:20])  # get the row index
-    y.append(row[1][0])     # get the count value   
-   
-total = sum(y)
-y_pct = [ np.round( (x / total)*100,1) for x in y]   
-# get x (sizes) and y (labels) data 
-pie2_labels = x
-pie2_sizes = np.array(y_pct)
+stack2 = data[columns]
+stack2.groupby('q0026').size()
+staked2_label = ["All respondents"]
+
+straight  = stack2[ stack2['q0026'] == 'Straight'].count()
+gay       = stack2[ stack2['q0026'] == 'Gay'].count()
+bisexual  = stack2[ stack2['q0026'] == 'Bisexual'].count()
+other     = stack2[ stack2['q0026'] == 'Other'].count()
+no_answer = stack2[ stack2['q0026'] == 'No answer'].count()
+
+columns = ["q0026","bisexual", "gay", "no answer","other","straight"]
+df = pd.DataFrame( list(zip(staked2_label,bisexual,gay,no_answer,other,straight)) , columns = columns)
+df_total = df["bisexual"] + df["gay"] + df["no answer"]+df["other"]+df["straight"]
+df_rel = np.round(df[df.columns[1:]].div(df_total, 0)*100,1)
+start = 0
+'''
+fig, ax = plt.subplots(figsize=(15, 10))
+
+ax.broken_barh([(start, df_rel["straight"])
+        , (df_rel["straight"], df_rel["straight"]+ df_rel["gay"])
+        , (df_rel["straight"]+df_rel["gay"], df_rel["straight"]+df_rel["gay"]+df_rel["bisexual"])
+        , (df_rel["straight"]+df_rel["gay"]+df_rel["bisexual"], df_rel["straight"]+df_rel["gay"]+df_rel["bisexual"]+df_rel["other"])
+        , (df_rel["straight"]+df_rel["gay"]+df_rel["bisexual"]+df_rel["other"], df_rel["straight"]+df_rel["gay"]+df_rel["bisexual"]+df_rel["other"]+df_rel["no answer"])
+        ], [10, 9]
+        , facecolors=('tab:brown', 'tab:pink', 'tab:grey','tab:olive','tab:cyan')
+                      )
+ax.set_ylim(5, 15)
+ax.set_xlim(0, 100)
+ax.spines['left'].set_visible(False)
+ax.spines['bottom'].set_visible(False)
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+ax.set_yticks([15, 25])
+ax.set_xticks([0, 25, 50, 75, 100])
+
+ax.set_axisbelow(True) 
+
+print(df_rel["straight"].values[0])
+
+ax.set_yticklabels([""])
+ax.grid(axis='x')
+ax.text(df_rel["straight"]-6, 14.5, str(df_rel["straight"].values[0])+"%", fontsize=8)
+ax.text((df_rel["straight"]+ df_rel["gay"])-4, 14.5, str(df_rel["gay"].values[0])+"%", fontsize=8)
+ax.text((df_rel["straight"]+df_rel["gay"]+df_rel["bisexual"])-3, 14.5, str(df_rel["bisexual"].values[0])+"%", fontsize=8)
+ax.text((df_rel["straight"]+df_rel["gay"]+df_rel["bisexual"]+df_rel["other"])-1.5, 14.5, str(df_rel["other"].values[0])+ "%", fontsize=8)
+ax.text((df_rel["straight"]+df_rel["gay"]+df_rel["bisexual"]+df_rel["other"]+df_rel["no answer"])+1, 14.5, str(df_rel["no answer"].values[0])+ "%", fontsize=8)
+
+fig.suptitle('This is title of the chart', fontsize=16)
+
+leg1 = mpatches.Patch(color='tab:brown', label='straight')
+leg2 = mpatches.Patch(color='tab:pink', label='gay')
+leg3 = mpatches.Patch(color='tab:grey', label='bisexual')
+leg4 = mpatches.Patch(color='tab:olive', label='other')
+leg5 = mpatches.Patch(color='tab:cyan', label='no answer')
+ax.legend(handles=[leg1, leg2, leg3, leg4, leg5], ncol=5)
+
+plt.show()
+'''
 
 #########################################
 # 4 line chart
@@ -107,7 +151,7 @@ liney = tot.values
 
 #########################################
 # cards
-fig, ((ax1, ax2), (ax3,ax4)) = plt.subplots(nrows=2, ncols=2, figsize=(15, 10))
+fig, ((ax1, ax2), (ax3,ax4)) = plt.subplots(nrows=2, ncols=2, figsize=(20, 15))
 # total respondentss
 ax1.pie(x=pie_sizes, labels = pie_labels, colors=pie_colors, labeldistance=0.0)
 ax1.set_title('Total respondents')
@@ -117,7 +161,36 @@ ax2.set_yticks(ind+width/2)
 ax2.set_yticklabels(barhx, minor=False)
 ax2.set_title('Total respondents by age group')
 # total respondents by sexual orientation
-ax3.pie(x=pie2_sizes, labels = pie2_labels, autopct='%1.1f%%')
+ax3.broken_barh([(start, df_rel["straight"])
+        , (df_rel["straight"], df_rel["straight"]+ df_rel["gay"])
+        , (df_rel["straight"]+df_rel["gay"], df_rel["straight"]+df_rel["gay"]+df_rel["bisexual"])
+        , (df_rel["straight"]+df_rel["gay"]+df_rel["bisexual"], df_rel["straight"]+df_rel["gay"]+df_rel["bisexual"]+df_rel["other"])
+        , (df_rel["straight"]+df_rel["gay"]+df_rel["bisexual"]+df_rel["other"], df_rel["straight"]+df_rel["gay"]+df_rel["bisexual"]+df_rel["other"]+df_rel["no answer"])
+        ], [10, 9]
+        , facecolors=('tab:brown', 'tab:pink', 'tab:grey','tab:olive','tab:cyan')
+                      )
+ax3.set_ylim(5, 15)
+ax3.set_xlim(0, 100)
+ax3.spines['left'].set_visible(False)
+ax3.spines['bottom'].set_visible(False)
+ax3.spines['top'].set_visible(False)
+ax3.spines['right'].set_visible(False)
+ax3.set_yticks([15, 25])
+ax3.set_xticks([0, 25, 50, 75, 100])
+ax3.set_axisbelow(True) 
+ax3.set_yticklabels([""])
+ax3.grid(axis='x')
+ax3.text(df_rel["straight"]-6, 14.5, str(df_rel["straight"].values[0])+"%", fontsize=8)
+ax3.text((df_rel["straight"]+ df_rel["gay"])-6, 14.5, str(df_rel["gay"].values[0])+"%", fontsize=8)
+ax3.text((df_rel["straight"]+df_rel["gay"]+df_rel["bisexual"])-4, 14.5, str(df_rel["bisexual"].values[0])+"%", fontsize=8)
+ax3.text((df_rel["straight"]+df_rel["gay"]+df_rel["bisexual"]+df_rel["other"])-1.5, 14.5, str(df_rel["other"].values[0])+ "%", fontsize=8)
+ax3.text((df_rel["straight"]+df_rel["gay"]+df_rel["bisexual"]+df_rel["other"]+df_rel["no answer"])+2, 14.5, str(df_rel["no answer"].values[0])+ "%", fontsize=8)
+leg1 = mpatches.Patch(color='tab:brown', label='straight')
+leg2 = mpatches.Patch(color='tab:pink', label='gay')
+leg3 = mpatches.Patch(color='tab:grey', label='bisexual')
+leg4 = mpatches.Patch(color='tab:olive', label='other')
+leg5 = mpatches.Patch(color='tab:cyan', label='no answer')
+ax3.legend(handles=[leg1, leg2, leg3, leg4, leg5], ncol=5)
 ax3.set_title('Total respondents by sexual orientation')
 #total respondents by civil status
 ax4.plot(linex, liney)
