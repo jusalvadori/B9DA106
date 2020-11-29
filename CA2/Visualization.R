@@ -130,7 +130,7 @@ card4
 
 
 # Ploting multpile charts
-plot_grid(card1,card3, card2, card4)
+plot_grid(card1,card2, card3, card4)
 
 # Plot 1 - In general, how masculine or “manly” do you feel?
 require(dplyr)
@@ -197,7 +197,7 @@ q0005_bar <- q0005_bar %>%
   mutate(tot = round(100 * (nro / nrLines)),2)
 colnames(q0005_bar) <- c("group", 'nro', 'perc',  'pos')
 
-plot4 <- ggplot(q0005_bar, aes(fill=group, y=perc, x=2, label=perc)) + 
+plot4 <- ggplot(q0005_bar, aes(fill=group, y=perc, x=2, label='')) + 
          #geom_col() + coord_flip() +
          geom_bar(stat = "identity", width = 1) + coord_flip() +
          labs(x = NULL, y = NULL, fill = NULL, title='Do you think that society puts pressure on men \n in a way that is unhealthy or bad for them?') +
@@ -212,14 +212,16 @@ plot4
 
 # Plot 4.1 - q0005 vs age3 Do you think that society puts pressure on men in a way that is unhealthy or bad for them? by Age group
 require(dplyr)
-q0005_by_age <- dataset %>% count(q0005,age3)
+q0005_by_age <- dataset [ dataset$q0005 != 'No answer', ]
+q0005_by_age <- q0005_by_age %>% count(q0005,age3)
 q0005_by_age <- q0005_by_age[order(q0005_by_age$age3),]
 colnames(q0005_by_age) <- c("group", "age", 'nro')
+total = sum(q0005_by_age[, 'nro'])
 q0005_by_age <- q0005_by_age %>% 
-  mutate(tot = 100 * round((nro / nrLines),2))
+  mutate(tot = 100 * round((nro / total),2))
 
 
-plot4_1 <- ggplot((q0005_by_age), aes(fill=group, y=tot, x=age,label=tot)) + 
+plot4_1 <- ggplot((q0005_by_age), aes(fill=group, y=tot, x=age,label='')) + 
   geom_bar(stat = "identity", width = 0.9) + coord_flip() +
   labs(x = NULL, y = NULL, fill = NULL, title='Do you think that society puts pressure on men \n in a way that is unhealthy or bad for them? \n by Age group') +
   theme(legend.position="none") +
@@ -239,7 +241,7 @@ q0017_bar <- q0017_bar %>%
   mutate(tot = 100 * round((nro / nrLines),2))
 
 
-plot5 <- ggplot((q0017_bar), aes(fill=group, y=tot, x=2,label=tot)) + 
+plot5 <- ggplot((q0017_bar), aes(fill=group, y=tot, x=2,label='')) + 
   geom_bar(stat = "identity", width = 0.9) + coord_flip() +
   labs(x = NULL, y = NULL, fill = NULL, title='Do you typically feel as though you’re expected \n to make the first move in romantic relationships?') +
   theme(legend.position="none") +
@@ -258,9 +260,9 @@ q0017_by_age <- q0017_by_age %>%
   mutate(tot = 100 * round((nro / nrLines),2))
 
 
-plot5_1 <- ggplot((q0017_by_age), aes(fill=group, y=tot, x=age,label=tot)) + 
+plot5_1 <- ggplot((q0017_by_age), aes(fill=group, y=tot, x=age,label='')) + 
   geom_bar(stat = "identity", width = 0.9) + coord_flip() +
-  labs(x = NULL, y = NULL, fill = NULL, title='Do you think that society puts pressure on men \n in a way that is unhealthy or bad for them? \n by Age group') +
+  labs(x = NULL, y = NULL, fill = NULL, title='Do you typically feel as though you’re expected to make the first move in romantic relationships? \n by Age group') +
   theme(legend.position="none") +
   geom_text(size = 5, position = position_stack(vjust = 0.5),data=subset(q0005_by_age, tot>0)) +
   theme_classic() + 
