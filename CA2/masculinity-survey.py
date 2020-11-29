@@ -154,12 +154,12 @@ liney = tot.values
 fig, ((ax1, ax2), (ax3,ax4)) = plt.subplots(nrows=2, ncols=2, figsize=(20, 15))
 # total respondentss
 ax1.pie(x=pie_sizes, labels = pie_labels, colors=pie_colors, labeldistance=0.0)
-ax1.set_title('Total respondents')
+ax1.set_title('Total respondents',  fontdict={'fontsize': 18, 'fontweight': 'medium'})
 # total respondents by age range
 ax2.barh(ind, barhy, width, color= barh_colors)
 ax2.set_yticks(ind+width/2)
 ax2.set_yticklabels(barhx, minor=False)
-ax2.set_title('Total respondents by age group')
+ax2.set_title('Total respondents by age group', fontdict={'fontsize': 18, 'fontweight': 'medium'})
 # total respondents by sexual orientation
 ax3.broken_barh([(start, df_rel["straight"])
         , (df_rel["straight"], df_rel["straight"]+ df_rel["gay"])
@@ -191,10 +191,10 @@ leg3 = mpatches.Patch(color='tab:grey', label='bisexual')
 leg4 = mpatches.Patch(color='tab:olive', label='other')
 leg5 = mpatches.Patch(color='tab:cyan', label='no answer')
 ax3.legend(handles=[leg1, leg2, leg3, leg4, leg5], ncol=5)
-ax3.set_title('Total respondents by sexual orientation')
+ax3.set_title('Total respondents by sexual orientation',fontdict={'fontsize': 18, 'fontweight': 'medium'})
 #total respondents by civil status
 ax4.plot(linex, liney, marker='o')
-ax4.set_title('Total respondents by civil status')
+ax4.set_title('Total respondents by civil status',fontdict={'fontsize': 18, 'fontweight': 'medium'})
 plt.show()
 
 '''
